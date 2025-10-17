@@ -55,6 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Инициализация Cube.js API
+    const cubejsApi = cubejs.CubejsApi('YOUR_CUBES_API_TOKEN', {
+        apiUrl: 'http://46.8.238.87:4000/cubejs-api/v1'
+    });
+
     // Функция для загрузки данных из Cube.js API
     async function loadDashboardData(schema) {
         // Обновляем токен с новой схемой (в реальном приложении токен будет обновляться на бэкенде)
