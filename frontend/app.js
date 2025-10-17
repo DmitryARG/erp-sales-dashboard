@@ -22,28 +22,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('password').value;
 
         try {
-            // Имитация запроса на эндпоинт /login
-            // В реальном приложении здесь будет реальный запрос аутентификации
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
-
-            // Имитация успешного входа
-            if (true) { // Предполагаем, что вход всегда успешен для демонстрации
-                // Скрыть страницу входа и показать дашборд
-                loginPage.classList.add('hidden');
-                dashboardPage.classList.remove('hidden');
-                
-                // Имитация получения доступных схем
-                const availableSchemas = ['client1', 'client2'];
-                populateSchemaSelect(availableSchemas);
-            } else {
-                alert('Ошибка входа. Проверьте логин и пароль.');
-            }
+            // Имитация успешного входа без реального запроса на /login
+            // Скрыть страницу входа и показать дашборд
+            loginPage.classList.add('hidden');
+            dashboardPage.classList.remove('hidden');
+            
+            // Имитация получения доступных схем
+            const availableSchemas = ['client1', 'client2'];
+            populateSchemaSelect(availableSchemas);
         } catch (error) {
             console.error('Ошибка при входе:', error);
             alert('Ошибка при входе. Попробуйте еще раз.');
@@ -100,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Выполняем оба запроса параллельно
             const [tableResponse, chartResponse] = await Promise.all([
-                fetch('http://localhost:4000/cubejs-api/v1/load', {
+                fetch('http://46.8.238.87:4000/cubejs-api/v1/load', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -108,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify({ query: tableQuery })
                 }),
-                fetch('http://localhost:4000/cubejs-api/v1/load', {
+                fetch('http://46.8.238.87:4000/cubejs-api/v1/load', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
