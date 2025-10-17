@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: cube
+      POSTGRES_PASSWORD: cube
+      POSTGRES_DB: cube_stat
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db-init-scripts:/docker-entrypoint-initdb.d
+
+  cube:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      - CUBEJS_DB_TYPE=postgres
+      - CUBEJS_DB_HOST=postgres
+      - CUBEJS_DB_PORT=5432
+      - CUBEJS_DB_USER=cube
+      - CUBEJS_DB_PASS=cube
+      - CUBEJS_DB_NAME=cube_stat
+      - CUBEJS_API_SECRET=secret
+      - CUBEJS_EXTERNAL_DEFAULT=true
+    ports:
+      - "4000:4000"
+
+  frontend:
+    image: nginx
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+
+volumes:
+  postgres_data:

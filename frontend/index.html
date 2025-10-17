@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервис статистики продаж</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="login-page" class="page">
+        <div class="login-container">
+            <h2>Вход в систему</h2>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">Логин:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Войти</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-page" class="page hidden">
+        <header>
+            <h1>Панель статистики продаж</h1>
+            <button id="logout-btn" class="logout-btn">Выйти</button>
+        </header>
+        
+        <main>
+            <div class="controls">
+                <label for="schema-select">Выберите схему:</label>
+                <select id="schema-select">
+                    <option value="">-- Выберите схему --</option>
+                </select>
+            </div>
+            
+            <div id="sales-chart-container" class="chart-container">
+                <canvas id="sales-chart"></canvas>
+            </div>
+            
+            <div id="sales-table-container" class="table-container">
+                <h3>Данные продаж</h3>
+                <div id="sales-table"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
