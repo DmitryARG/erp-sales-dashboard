@@ -1,5 +1,18 @@
 {
+  "name": "erp-sales-dashboard",
+  "version": "1.0.0",
+  "description": "ERP Sales Dashboard with Cube.js",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cubejs-server",
+    "start": "cubejs-server"
+  },
   "dependencies": {
-    "@playwright/test": "^1.56.1"
-  }
+    "@cubejs-backend/server": "^0.35.0",
+    "@cubejs-backend/postgres-driver": "^0.35.0"
+  },
+  "devDependencies": {},
+  "keywords": ["cubejs", "erp", "dashboard"],
+  "author": "",
+  "license": "ISC"
 }
