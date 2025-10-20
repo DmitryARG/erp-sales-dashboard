@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика продаж</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="login-container">
+        <h1>Вход в систему</h1>
+        <form id="login-form">
+            <input type="text" id="login" placeholder="Логин" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+
+    <div id="schema-container" style="display: none;">
+        <h1>Выберите схему</h1>
+        <select id="schema-select"></select>
+        <button id="select-schema">Выбрать</button>
+    </div>
+
+    <div id="dashboard" style="display: none;">
+        <h1>Статистика продаж</h1>
+        <table id="sales-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Продукт</th>
+                    <th>Количество</th>
+                    <th>Цена</th>
+                    <th>Дата продажи</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <canvas id="sales-chart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

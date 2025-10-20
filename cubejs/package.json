@@ -1,0 +1,14 @@
+{
+  "name": "erp-sales-dashboard-cubejs",
+  "version": "1.0.0",
+  "description": "CubeJS setup for ERP Sales Dashboard",
+  "main": "cube.js",
+  "scripts": {
+    "start": "node cube.js"
+  },
+  "dependencies": {
+    "@cubejs-backend/postgres-driver": "^0.35.0",
+    "@cubejs-backend/server": "^0.35.0",
+    "pg": "^8.11.0"
+  }
+}
