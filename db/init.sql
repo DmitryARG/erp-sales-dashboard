@@ -1,24 +1,24 @@
 -- Создание схем
-CREATE SCHEMA IF NOT EXISTS client1;
-CREATE SCHEMA IF NOT EXISTS client2;
-CREATE SCHEMA IF NOT EXISTS client3;
+CREATE SCHEMA IF NOT EXISTS company1;
+CREATE SCHEMA IF NOT EXISTS company2;
+CREATE SCHEMA IF NOT EXISTS company3;
 
 -- Создание таблицы users в базе erp
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     login VARCHAR UNIQUE,
     pass VARCHAR,
-    user_schema VARCHAR
+    user_schemas TEXT[]
 );
 
 -- Вставка тестовых данных в таблицу users
-INSERT INTO users (login, pass, user_schema) VALUES
-('user1', 'pass1', 'client1'),
-('user2', 'pass2', 'client2'),
-('user3', 'pass3', 'client3');
+INSERT INTO users (login, pass, user_schemas) VALUES
+('user1', 'pass1pass', ARRAY['company1', 'company2']),
+('user2', 'pass2pass', ARRAY['company2', 'company3']),
+('user3', 'pass3pass', ARRAY['company1', 'company3']);
 
--- Создание таблицы sales в схеме client1
-CREATE TABLE client1.sales (
+-- Создание таблицы sales в схеме company1
+CREATE TABLE company1.sales (
     id SERIAL PRIMARY KEY,
     product_name VARCHAR,
     quantity INTEGER,
@@ -26,8 +26,8 @@ CREATE TABLE client1.sales (
     sale_date DATE
 );
 
--- Вставка тестовых данных в таблицу client1.sales
-INSERT INTO client1.sales (product_name, quantity, price, sale_date) VALUES
+-- Вставка тестовых данных в таблицу company1.sales
+INSERT INTO company1.sales (product_name, quantity, price, sale_date) VALUES
 ('Product A', 10, 15.50, '2023-01-01'),
 ('Product B', 5, 20.00, '2023-01-02'),
 ('Product C', 8, 12.75, '2023-01-03'),
@@ -37,8 +37,8 @@ INSERT INTO client1.sales (product_name, quantity, price, sale_date) VALUES
 ('Product G', 4, 18.00, '2023-01-07'),
 ('Product H', 9, 14.25, '2023-01-08');
 
--- Создание таблицы sales в схеме client2
-CREATE TABLE client2.sales (
+-- Создание таблицы sales в схеме company2
+CREATE TABLE company2.sales (
     id SERIAL PRIMARY KEY,
     product_name VARCHAR,
     quantity INTEGER,
@@ -46,8 +46,8 @@ CREATE TABLE client2.sales (
     sale_date DATE
 );
 
--- Вставка тестовых данных в таблицу client2.sales
-INSERT INTO client2.sales (product_name, quantity, price, sale_date) VALUES
+-- Вставка тестовых данных в таблицу company2.sales
+INSERT INTO company2.sales (product_name, quantity, price, sale_date) VALUES
 ('Item X', 15, 10.00, '2023-02-01'),
 ('Item Y', 6, 22.50, '2023-02-02'),
 ('Item Z', 11, 9.99, '2023-02-03'),
@@ -57,8 +57,8 @@ INSERT INTO client2.sales (product_name, quantity, price, sale_date) VALUES
 ('Item T', 5, 16.00, '2023-02-07'),
 ('Item S', 10, 13.75, '2023-02-08');
 
--- Создание таблицы sales в схеме client3
-CREATE TABLE client3.sales (
+-- Создание таблицы sales в схеме company3
+CREATE TABLE company3.sales (
     id SERIAL PRIMARY KEY,
     product_name VARCHAR,
     quantity INTEGER,
@@ -66,8 +66,8 @@ CREATE TABLE client3.sales (
     sale_date DATE
 );
 
--- Вставка тестовых данных в таблицу client3.sales
-INSERT INTO client3.sales (product_name, quantity, price, sale_date) VALUES
+-- Вставка тестовых данных в таблицу company3.sales
+INSERT INTO company3.sales (product_name, quantity, price, sale_date) VALUES
 ('Good 1', 20, 5.00, '2023-03-01'),
 ('Good 2', 7, 28.00, '2023-03-02'),
 ('Good 3', 13, 11.50, '2023-03-03'),

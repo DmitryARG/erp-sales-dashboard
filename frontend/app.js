@@ -1,4 +1,5 @@
-let userSchema = '';
+let userSchemas = [];
+let jwtToken = '';
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -12,9 +13,14 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             body: JSON.stringify({ login, password })
         });
         const data = await response.json();
+        console.log('Login response data:', data);
         if (response.ok) {
-            userSchema = data.user_schema;
-            showSchemaSelection();
+            jwtToken = data.token;
+            userSchemas = data.userSchemas; // Array of schemas from JWT
+            console.log('userSchemas:', userSchemas, 'type:', typeof userSchemas, 'isArray:', Array.isArray(userSchemas));
+            populateSchemaSelect(userSchemas);
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('schema-selection').style.display = 'block';
         } else {
             alert('Ошибка входа: ' + data.message);
         }
@@ -23,22 +29,32 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     }
 });
 
-function showSchemaSelection() {
-    document.getElementById('login-container').style.display = 'none';
-    document.getElementById('schema-container').style.display = 'block';
+document.getElementById('select-schema-btn').addEventListener('click', () => {
+    const selectedSchema = document.getElementById('schema-select').value;
+    if (selectedSchema) {
+        loadSalesData(selectedSchema);
+    } else {
+        alert('Пожалуйста, выберите схему.');
+    }
+});
 
+function populateSchemaSelect(schemas) {
+    console.log('populateSchemaSelect called with schemas:', schemas);
     const select = document.getElementById('schema-select');
     select.innerHTML = '';
-    const option = document.createElement('option');
-    option.value = userSchema;
-    option.textContent = userSchema;
-    select.appendChild(option);
+    if (!schemas || !Array.isArray(schemas)) {
+        console.error('schemas is not an array or is undefined:', schemas);
+        return;
+    }
+    schemas.forEach(schema => {
+        const option = document.createElement('option');
+        option.value = schema;
+        option.textContent = schema.replace(/company(\d+)/, 'Company $1');
+        select.appendChild(option);
+    });
 }
 
-document.getElementById('select-schema').addEventListener('click', () => {
-    const selectedSchema = document.getElementById('schema-select').value;
-    loadSalesData(selectedSchema);
-});
+
 
 async function loadSalesData(schema) {
     try {
@@ -47,9 +63,12 @@ async function loadSalesData(schema) {
             dimensions: ['Sales.id', 'Sales.product_name', 'Sales.quantity', 'Sales.price', 'Sales.sale_date']
         };
 
-        const tableResponse = await fetch('/cubejs-api/v1/load?schema=' + encodeURIComponent(schema), {
+        const tableResponse = await fetch(`/cubejs-api/v1/load?tenantId=${schema}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`
+            },
             body: JSON.stringify({ query: tableQuery })
         });
         const tableData = await tableResponse.json();
@@ -65,9 +84,12 @@ async function loadSalesData(schema) {
             dimensions: ['Sales.sale_date']
         };
 
-        const chartResponse = await fetch('/cubejs-api/v1/load?schema=' + encodeURIComponent(schema), {
+        const chartResponse = await fetch(`/cubejs-api/v1/load?tenantId=${schema}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`
+            },
             body: JSON.stringify({ query: chartQuery })
         });
         const chartData = await chartResponse.json();
@@ -79,7 +101,9 @@ async function loadSalesData(schema) {
 
         displayTable(tableData.data);
         displayChart(chartData.data);
-        document.getElementById('schema-container').style.display = 'none';
+        const displaySchema = schema.replace(/company(\d+)/, 'Company $1');
+        document.getElementById('dashboard-title').textContent = `Статистика продаж - Схема: ${displaySchema}`;
+        document.getElementById('schema-selection').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
     } catch (error) {
         alert('Ошибка сети: ' + error.message);

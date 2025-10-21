@@ -7,7 +7,7 @@ cube(`Sales`, {
       quantity,
       price,
       quantity * price AS total
-    FROM client1.sales
+    FROM ${COMPILE_CONTEXT.securityContext?.tenantId}.sales
   `,
 
   dimensions: {

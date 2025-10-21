@@ -14,16 +14,24 @@
             <input type="password" id="password" placeholder="Пароль" required>
             <button type="submit">Войти</button>
         </form>
+        <div id="test-credentials">
+            <h3>Тестовые учетные данные:</h3>
+            <ul>
+                <li>Пользователь: user1, Пароль: pass1pass</li>
+                <li>Пользователь: user2, Пароль: pass2pass</li>
+                <li>Пользователь: user3, Пароль: pass3pass</li>
+            </ul>
+        </div>
     </div>
 
-    <div id="schema-container" style="display: none;">
+    <div id="schema-selection" style="display: none;">
         <h1>Выберите схему</h1>
         <select id="schema-select"></select>
-        <button id="select-schema">Выбрать</button>
+        <button id="select-schema-btn">Выбрать</button>
     </div>
 
     <div id="dashboard" style="display: none;">
-        <h1>Статистика продаж</h1>
+        <h1 id="dashboard-title">Статистика продаж</h1>
         <table id="sales-table">
             <thead>
                 <tr>
