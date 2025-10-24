@@ -32,11 +32,36 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 document.getElementById('select-schema-btn').addEventListener('click', () => {
     const selectedSchema = document.getElementById('schema-select').value;
     if (selectedSchema) {
-        loadSalesData(selectedSchema);
+        populateTableSelect();
+        document.getElementById('table-select').style.display = 'block';
+        document.getElementById('select-table-btn').style.display = 'block';
+        document.getElementById('select-schema-btn').style.display = 'none';
     } else {
         alert('Пожалуйста, выберите схему.');
     }
 });
+
+document.getElementById('select-table-btn').addEventListener('click', () => {
+    const selectedSchema = document.getElementById('schema-select').value;
+    const selectedTable = document.getElementById('table-select').value;
+    if (selectedTable) {
+        loadData(selectedSchema, selectedTable);
+    } else {
+        alert('Пожалуйста, выберите таблицу.');
+    }
+});
+
+function populateTableSelect() {
+    const select = document.getElementById('table-select');
+    select.innerHTML = '';
+    const tables = ['Sales', 'MartIncomingGoods'];
+    tables.forEach(table => {
+        const option = document.createElement('option');
+        option.value = table;
+        option.textContent = table;
+        select.appendChild(option);
+    });
+}
 
 function populateSchemaSelect(schemas) {
     console.log('populateSchemaSelect called with schemas:', schemas);
@@ -56,12 +81,22 @@ function populateSchemaSelect(schemas) {
 
 
 
-async function loadSalesData(schema) {
+async function loadData(schema, table) {
     try {
+        let tableQuery, chartQuery, tableDimensions, chartMeasures, chartDimensions;
+
+        if (table === 'Sales') {
+            tableDimensions = ['Sales.id', 'Sales.product_name', 'Sales.quantity', 'Sales.price', 'Sales.sale_date'];
+            chartMeasures = ['Sales.total'];
+            chartDimensions = ['Sales.sale_date'];
+        } else if (table === 'MartIncomingGoods') {
+            tableDimensions = ['MartIncomingGoods.incoming_good_key', 'MartIncomingGoods.incoming_code', 'MartIncomingGoods.date_key', 'MartIncomingGoods.warehouse_key', 'MartIncomingGoods.product_key', 'MartIncomingGoods.status', 'MartIncomingGoods.creation_date', 'MartIncomingGoods.shipment_type', 'MartIncomingGoods.marketplace_key'];
+            chartMeasures = ['MartIncomingGoods.total_quantity'];
+            chartDimensions = ['MartIncomingGoods.date_key'];
+        }
+
         // Query for table: only dimensions
-        const tableQuery = {
-            dimensions: ['Sales.id', 'Sales.product_name', 'Sales.quantity', 'Sales.price', 'Sales.sale_date']
-        };
+        tableQuery = { dimensions: tableDimensions };
 
         const tableResponse = await fetch(`/cubejs-api/v1/load?tenantId=${schema}`, {
             method: 'POST',
@@ -78,10 +113,10 @@ async function loadSalesData(schema) {
             return;
         }
 
-        // Query for chart: measures total by sale_date
-        const chartQuery = {
-            measures: ['Sales.total'],
-            dimensions: ['Sales.sale_date']
+        // Query for chart: measures total by date
+        chartQuery = {
+            measures: chartMeasures,
+            dimensions: chartDimensions
         };
 
         const chartResponse = await fetch(`/cubejs-api/v1/load?tenantId=${schema}`, {
@@ -99,10 +134,10 @@ async function loadSalesData(schema) {
             return;
         }
 
-        displayTable(tableData.data);
-        displayChart(chartData.data);
+        displayTable(tableData.data, table);
+        displayChart(chartData.data, table);
         const displaySchema = schema.replace(/company(\d+)/, 'Company $1');
-        document.getElementById('dashboard-title').textContent = `Статистика продаж - Схема: ${displaySchema}`;
+        document.getElementById('dashboard-title').textContent = `Статистика - Схема: ${displaySchema}, Таблица: ${table}`;
         document.getElementById('schema-selection').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
     } catch (error) {
@@ -110,33 +145,61 @@ async function loadSalesData(schema) {
     }
 }
 
-function displayTable(sales) {
+function displayTable(data, table) {
     const tbody = document.querySelector('#sales-table tbody');
+    const thead = document.querySelector('#sales-table thead tr');
     tbody.innerHTML = '';
-    sales.forEach(sale => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${sale['Sales.id']}</td>
-            <td>${sale['Sales.product_name']}</td>
-            <td>${sale['Sales.quantity']}</td>
-            <td>${sale['Sales.price']}</td>
-            <td>${sale['Sales.sale_date']}</td>
-        `;
-        tbody.appendChild(row);
+
+    if (data.length === 0) return;
+
+    // Get column names from the first row
+    const columns = Object.keys(data[0]);
+
+    // Update table headers
+    thead.innerHTML = '';
+    columns.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col.split('.').pop(); // Remove table prefix
+        thead.appendChild(th);
+    });
+
+    // Populate table rows
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        columns.forEach(col => {
+            const td = document.createElement('td');
+            td.textContent = row[col];
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
     });
 }
 
-function displayChart(sales) {
+function displayChart(data, table) {
     const ctx = document.getElementById('sales-chart').getContext('2d');
-    const labels = sales.map(sale => sale['Sales.sale_date']);
-    const totals = sales.map(sale => sale['Sales.total']);
+
+    let labels, totals, labelText, xTitle, yTitle;
+
+    if (table === 'Sales') {
+        labels = data.map(item => item['Sales.sale_date']);
+        totals = data.map(item => item['Sales.total']);
+        labelText = 'Общая сумма продаж';
+        xTitle = 'Дата продажи';
+        yTitle = 'Сумма';
+    } else if (table === 'MartIncomingGoods') {
+        labels = data.map(item => item['MartIncomingGoods.date_key']);
+        totals = data.map(item => item['MartIncomingGoods.total_quantity']);
+        labelText = 'Общее количество поступлений';
+        xTitle = 'Дата поступления';
+        yTitle = 'Количество';
+    }
 
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Общая сумма продаж',
+                label: labelText,
                 data: totals,
                 borderColor: '#000000',
                 backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -146,8 +209,8 @@ function displayChart(sales) {
         options: {
             responsive: true,
             scales: {
-                x: { display: true, title: { display: true, text: 'Дата продажи' } },
-                y: { display: true, title: { display: true, text: 'Сумма' } }
+                x: { display: true, title: { display: true, text: xTitle } },
+                y: { display: true, title: { display: true, text: yTitle } }
             }
         }
     });
