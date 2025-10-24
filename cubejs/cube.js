@@ -31,13 +31,15 @@ const server = new CubejsServer({
         try {
           const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
           securityContext = { tenantId: decoded.tenantId };
-          console.log('Set securityContext in contextToAppId:', securityContext);
         } catch (e) {
-          console.log('Failed to decode token in contextToAppId:', e.message);
+          throw new Error('Failed to decode token in contextToAppId');
         }
       }
     }
-    return `CUBEJS_APP_${securityContext?.tenantId}`;
+    if (!securityContext?.tenantId) {
+      throw new Error('No tenantId in securityContext');
+    }
+    return `CUBEJS_APP_${securityContext.tenantId}`;
   },
   contextToOrchestratorId: ({ securityContext }) => `CUBEJS_APP_${securityContext?.tenantId}`,
   logger: (msg, params) => {
@@ -52,49 +54,15 @@ const server = new CubejsServer({
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
       const userSchemas = decoded.userSchemas;
-      console.log('Decoded JWT:', { tenantId: decoded.tenantId, userSchemas });
-      console.log('Query parameter tenantId:', req.query.tenantId);
-      const tenantId = req.query.tenantId || decoded.tenantId || userSchemas[0]; // Prioritize query param over JWT tenantId
-      if (!req.query.tenantId && !decoded.tenantId) {
-        console.log('Using default tenantId from userSchemas[0]:', userSchemas[0]);
-      }
-      console.log('Selected tenantId:', tenantId);
+      const tenantId = req.query.tenantId || decoded.tenantId || userSchemas[0];
       if (!userSchemas.includes(tenantId)) {
-        console.log('Validation failed: tenantId not in userSchemas');
         throw new Error('Unauthorized: Access to this tenant not allowed');
       }
-      console.log('Validation passed: tenantId in userSchemas');
-      console.log('Returning securityContext:', { tenantId });
-      // Set securityContext on the request object for later use
       req.securityContext = { tenantId };
       return { tenantId };
     } catch (error) {
       throw new Error('Unauthorized: Invalid token or tenant access');
     }
-  },
-  queryRewrite: (query, context) => {
-    console.log('queryRewrite called with securityContext:', context.securityContext, 'request:', !!context.request);
-    if (!context.securityContext && context.request) {
-      // First try to get from request.securityContext set by checkAuth
-      if (context.request.securityContext) {
-        context.securityContext = context.request.securityContext;
-        console.log('Set securityContext from request in queryRewrite:', context.securityContext);
-      } else {
-        // Fallback to token decoding
-        const authHeader = context.request.headers.authorization;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-          const token = authHeader.substring(7);
-          try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-            context.securityContext = { tenantId: decoded.tenantId };
-            console.log('Set securityContext in queryRewrite:', context.securityContext);
-          } catch (e) {
-            console.log('Failed to decode token in queryRewrite:', e.message);
-          }
-        }
-      }
-    }
-    return query;
   },
 });
 
