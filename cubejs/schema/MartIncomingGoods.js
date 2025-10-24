@@ -68,6 +68,11 @@ cube(`MartIncomingGoods`, {
     quantity: {
       sql: `quantity`,
       type: `sum`
+    },
+
+    total_quantity: {
+      sql: `quantity`,
+      type: `sum`
     }
   },
 
